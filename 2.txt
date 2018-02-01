@@ -1,0 +1,6 @@
+//12
+SELECT * FROM STAFF_MASTERS WHERE TO_CHAR(HIRE_DATE,'DD') BETWEEN 0 AND 15;
+//14
+SELECT INSTR('Mississippi','i',1,3) from DUAL;
+//15
+SELECT to_char(NEXT_DAY(LAST_DAY( SYSDATE )-7,'FRIDAY'),'fmDdspth "of" Month YYYY ') as "Pay Date"FROM   DUAL;

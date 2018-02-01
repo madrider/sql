@@ -1,0 +1,170 @@
+//1
+create or replace function ar4_emp(lp_number IN OUT NUMBER)
+return number AS
+lv_sal arun_emp.salary%type;
+begin
+  select max(salary)
+  into lv_sal
+  from arun_emp
+  where department_id=lp_number;
+  
+ 
+  return lv_sal;
+  
+  EXCEPTION 
+  
+    when others then
+      RETURN -1;
+end;
+
+set serveroutput on
+DECLARE 
+lp_number NUMBER ;
+lp_sal NUMBER;
+BEGIN
+   lp_sal := &lp_number;
+   lp_sal := AR4_EMP(lp_sal);
+  DBMS_OUTPUT.PUT_LINE(lp_sal);
+END; 
+====================================================================
+//2
+create or replace function ar4_emp(dob in out date)
+return number AS
+age number;
+begin
+  
+  select round(MONTHS_BETWEEN(SYSDATE,to_date('22/02/1996','DD/MM/YYYY'))/12) into age
+  from dual;
+ 
+  return age;
+  
+  EXCEPTION 
+  
+    when others then
+      RETURN -1;
+end;
+
+set serveroutput on
+DECLARE 
+dob date := to_date('22/02/1996','DD/MM/YYYY');
+age number;
+BEGIN
+   age := ar4_emp(dob);
+
+  DBMS_OUTPUT.PUT_LINE(age);
+END; 
+===========================================
+//3 
+select * from staff_masters;
+create or replace FUNCTION casechange(code in OUT number) RETURN VARCHAR2 as
+
+
+
+CURSOR C IS SELECT staff_name FROM staff_masters WHERE staff_code = code for update of staff_name;
+ sname staff_masters.staff_name%TYPE; 
+BEGIN
+
+ OPEN C;
+
+ FETCH C INTO sname;
+ IF sname IS NULL THEN
+
+    RAISE NO_DATA_FOUND;
+  ELSE
+    update staff_masters set staff_name=UPPER(staff_name) where current of c;
+    RETURN 'SUCCESSFUL';
+ END IF;
+
+commit;
+ 
+  CLOSE C;
+
+  
+EXCEPTION
+
+ WHEN NO_DATA_FOUND THEN
+
+    DBMS_OUTPUT.PUT_LINE('No employee with that name exists');
+
+END;
+
+SET SERVEROUTPUT ON
+DECLARE
+  CODE NUMBER;
+  C VARCHAR2(50);
+BEGIN
+  CODE := &CODE;
+  C := CASECHANGE(CODE);
+  DBMS_OUTPUT.PUT_LINE(C);
+END;
+
+
+=====================================================================================
+//4
+create or replace procedure manager_details(code IN NUMBER) IS
+lv_mgn staff_masters.staff_name%type;
+lv_stn staff_masters.staff_name%type;
+lv_dtc staff_masters.dept_code%type;
+lv_stc staff_masters.staff_code%type;
+BEGIN
+select s.staff_code,s.staff_name,s.dept_code,m.staff_name 
+into lv_stc,lv_stn,lv_dtc,lv_mgn
+from staff_masters s, staff_masters m 
+where s.mgr_code=m.staff_code
+and s.staff_code=code;
+
+DBMS_OUTPUT.PUT_LINE(lv_stc||' '||lv_stn||' '||lv_dtc||' '||lv_mgn);
+
+
+
+END;
+
+set serveroutput on
+declare
+staffc number;
+begin
+manager_details(&staffc);
+end;
+
+select * from staff_masters;
+==================================================
+//5
+create or replace FUNCTION casechange(code in OUT number) RETURN number as
+
+sc staff_masters.staff_code%type;
+sal staff_masters.staff_sal%type;
+y number;
+begin
+ 
+ select staff_code,staff_sal,round(months_between(sysdate,hire_date)/12) as exp
+ into sc,sal,y
+ from staff_masters where staff_code=code;
+ sal :=(0.15+.2+.08)*sal;
+ if y < 1 then
+ sal := sal+0;
+ elsif y>=1 AND y<2 then
+ sal := sal + .10*sal;
+ elsif y>=2 AND y<4 then
+ sal := sal + .20*sal;
+ else
+ sal := sal + .30*sal;
+  end if;
+ 
+ 
+ return sal;
+  
+ 
+end;
+
+
+set serveroutput on
+declare 
+cost number;
+code number;
+begin
+  cost :=&code;
+  cost :=casechange(cost);
+  DBMS_OUTPUT.PUT_LINE(cost);
+end;
+
+======================================================
